@@ -1,10 +1,10 @@
-import { catchError, concatMap, from, map, mergeMap, Observable, of, takeUntil, tap } from "rxjs";
-import { SourceFileProvider } from "./txtfileprovider";
-import { Dropbox, DropboxResponse, files } from 'dropbox';
-import { ActivatedRoute } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { Dropbox } from 'dropbox';
+import { catchError, concatMap, from, map, mergeMap, Observable, of, tap } from "rxjs";
 import { DropboxToken } from "../components/auth-callback-component/auth-callback-component";
+import { SourceFileProvider } from "./txtfileprovider";
 
 export class DropboxFileProvider implements SourceFileProvider {
     name: string = "Dropbox";
@@ -23,22 +23,22 @@ export class DropboxFileProvider implements SourceFileProvider {
         console.log("Creating new dropbox provider");
         this.dropboxKey = this.readDropboxKey();
     }
-    
+
     save(tasksString: string): Observable<void> {
         const token = this.readDropboxKey();
-        var dbx = new Dropbox({accessToken: token});
-        const blob = new Blob([tasksString], {type: 'text/plain'});
-        
+        const dbx = new Dropbox({ accessToken: token });
+        const blob = new Blob([tasksString], { type: 'text/plain' });
+
         return from(dbx.filesUpload({
             path: '/todo.txt',
             autorename: false,
             contents: blob,
-            mode: {".tag" : "overwrite"}
+            mode: { ".tag": "overwrite" }
         })).pipe(
-            tap(o => {
+            tap(() => {
                 this.logaswarn("File uploaded to dropbox")
             }),
-            map(o => {
+            map(() => {
                 return undefined;
             })
         );
@@ -49,17 +49,13 @@ export class DropboxFileProvider implements SourceFileProvider {
         if (dropboxKey === null || dropboxKey.length === 0) {
             return "";
         }
-        return dropboxKey; 
+        return dropboxKey;
     }
 
 
     provide(): Observable<string> {
         const key = this.readDropboxKey();
-        var dbx = new Dropbox({
-            clientId: "mq0ijugey03698h"
-        });
-
-        var dbx = new Dropbox({
+        const dbx = new Dropbox({
             accessToken: key
         });
         return from(dbx.filesListFolder({
@@ -76,14 +72,14 @@ export class DropboxFileProvider implements SourceFileProvider {
                         .pipe(
                             concatMap(x => {
                                 if (x === true) {
-                                    return from(dbx.filesListFolder({path: ""}))
+                                    return from(dbx.filesListFolder({ path: "" }))
                                 } else {
                                     this.performLoginOAuth();
                                     throw "user not logged in"
                                 }
                             })
                         );
-                        return z;
+                    return z;
                 }),
                 mergeMap(x => {
                     const f = x.result.entries.find(w => w.name === "todo.txt");
@@ -91,15 +87,15 @@ export class DropboxFileProvider implements SourceFileProvider {
                     if (f === null || f === undefined) {
                         throw "not implemented 2"
                     }
-                    return from(dbx.filesDownload({path: f.path_lower ?? ""}))
+                    return from(dbx.filesDownload({ path: f.path_lower ?? "" }))
                 }),
                 mergeMap(async o => {
                     console.log(`is downloadable: ${o.result.is_downloadable}`);
-                    const blob = (o.result as any).fileBlob;
-                    const txt = await blob.text(); 
+                    const blob = (o.result as unknown as WithFileBlob).fileBlob;
+                    const txt = await blob.text();
                     return txt as string;
                 })
-                
+
             );
     }
 
@@ -110,19 +106,18 @@ export class DropboxFileProvider implements SourceFileProvider {
             return of(false);
         }
 
-        let dbx = new Dropbox({
+        const dbx = new Dropbox({
             accessToken: accessToken
         });
 
         const x = from(dbx.checkUser({}))
             .pipe(
-                catchError(err => 
-                    {
+                catchError(err => {
 
                     if (err.status === 200)
                         return of({ status: 200 })
                     return of({ status: 0 })
-                    }),
+                }),
                 map(r => {
                     if (r.status === 200) {
                         return true;
@@ -132,23 +127,23 @@ export class DropboxFileProvider implements SourceFileProvider {
                 })
             );
         return x.pipe(
-            catchError(err => {
+            catchError(() => {
                 return this.tryRefreshToken();
             })
         );
     }
 
-    performLoginOAuth()  {
+    performLoginOAuth() {
         const clientId = this.clientId;
         const redirectUri = "http://localhost:4200/auth/callback";
         const authUrl = `https://www.dropbox.com/oauth2/authorize?token_access_type=offline&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = authUrl;
     }
 
-    readRefreshToken() : string | null {
+    readRefreshToken(): string | null {
         this.logaswarn("Refreshing token")
-        const str =  localStorage.getItem("DROPBOX_REFRESH_TOKEN");
-        if (str === null) 
+        const str = localStorage.getItem("DROPBOX_REFRESH_TOKEN");
+        if (str === null)
             return null;
 
         if (!str)
@@ -156,11 +151,10 @@ export class DropboxFileProvider implements SourceFileProvider {
         return str;
     }
 
-    tryRefreshToken() : Observable<boolean> 
-    {
+    tryRefreshToken(): Observable<boolean> {
         const data = this.readRefreshToken();
         const url = "http://localhost:3000/api/dropbox/refresh"
-        return this.httpClient.post<DropboxToken>(url, {refresh_token: data}).pipe(
+        return this.httpClient.post<DropboxToken>(url, { refresh_token: data }).pipe(
             tap(dbToken => {
                 console.log(`Got db token: `, dbToken);
             }),
@@ -169,18 +163,23 @@ export class DropboxFileProvider implements SourceFileProvider {
                 localStorage.setItem("DROPBOX_ACCESS_TOKEN", dbToken.access_token);
                 return true;
             }),
-            catchError(err => {
+            catchError(() => {
                 return of(false);
             }),
         );
-        
+
     }
 
-    logaswarn(message?: any, ...params: any[]) {
+    logaswarn(message?: unknown, ...params: unknown[]) {
         if (!message) {
             message = "";
         }
         message = "DropboxFileProvider: " + message;
         console.warn(message, params);
     }
+}
+
+
+export interface WithFileBlob {
+    fileBlob: Blob
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { concatMap, mergeMap, Subject, takeUntil } from 'rxjs';
+import { concatMap, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-auth-callback-component',
@@ -9,8 +9,8 @@ import { concatMap, mergeMap, Subject, takeUntil } from 'rxjs';
   templateUrl: './auth-callback-component.html',
   styleUrl: './auth-callback-component.scss'
 })
-export class AuthCallbackComponent implements OnInit, OnDestroy{
-  
+export class AuthCallbackComponent implements OnInit, OnDestroy {
+
   private route: ActivatedRoute;
   private http: HttpClient
 
@@ -28,22 +28,22 @@ export class AuthCallbackComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.route.queryParams
-    .pipe(
-      concatMap(params => {
-        const code = params['code'];
-        if (code) {
-          return this.http.post("http://localhost:3000/api/dropbox/exchange", { code });
-        }
-        throw "Wrong response from dropbox"
-      }),
-      takeUntil(this.subs$))
-    .subscribe(token => {
-      const dbToken = token as DropboxToken
-      localStorage.setItem("DROPBOX_ACCESS_TOKEN_DATA", JSON.stringify(dbToken));
-      localStorage.setItem("DROPBOX_ACCESS_TOKEN", dbToken.access_token);
-      localStorage.setItem("DROPBOX_REFRESH_TOKEN", dbToken.refresh_token);
-      window.location.href="http://localhost:4200"
-    })
+      .pipe(
+        concatMap(params => {
+          const code = params['code'];
+          if (code) {
+            return this.http.post("http://localhost:3000/api/dropbox/exchange", { code });
+          }
+          throw "Wrong response from dropbox"
+        }),
+        takeUntil(this.subs$))
+      .subscribe(token => {
+        const dbToken = token as DropboxToken
+        localStorage.setItem("DROPBOX_ACCESS_TOKEN_DATA", JSON.stringify(dbToken));
+        localStorage.setItem("DROPBOX_ACCESS_TOKEN", dbToken.access_token);
+        localStorage.setItem("DROPBOX_REFRESH_TOKEN", dbToken.refresh_token);
+        window.location.href = "http://localhost:4200"
+      })
   }
 }
 

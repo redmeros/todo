@@ -1,18 +1,17 @@
 import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { concatMap, filter, first, map, mergeMap, Subject, takeUntil, tap } from 'rxjs';
 import { AppState } from '../../services/appstate';
 import { SourceFileProvider } from '../../services/txtfileprovider';
-import { concatMap, filter, finalize, first, map, mergeMap, Subject, take, takeUntil, tap } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 
-import { parseTodoTxt, Task, stringifyTodoTxt, createTask, createEmptyTask } from "@mktbsh/todotxt";
-import { AsyncPipe } from '@angular/common';
+import { createEmptyTask, parseTodoTxt, stringifyTodoTxt, Task } from "@mktbsh/todotxt";
 
-import { NgbModal} from '@ng-bootstrap/ng-bootstrap'
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TaskModal } from '../../components/task-modal/task-modal';
 
 @Component({
   selector: 'app-mainview',
-  imports: [FormsModule, AsyncPipe],
+  imports: [FormsModule],
   templateUrl: './mainview.html',
   styleUrl: './mainview.scss'
 })
@@ -23,14 +22,14 @@ export class Mainview implements OnDestroy, OnInit {
 
   private _working = 0;
   public working = signal(0);
-  
 
-  private addWorking() : void {
+
+  private addWorking(): void {
     this._working += 1;
     this.working.update(o => o + 1)
     console.log(`adding working: ${this._working}`);
   }
-  private removeWorking() : void {
+  private removeWorking(): void {
     setTimeout(() => {
       this._working -= 1;
       console.log(`removing working: ${this._working}`);
@@ -41,7 +40,7 @@ export class Mainview implements OnDestroy, OnInit {
   availableSourceFileProviders: Array<SourceFileProvider> = [];
 
   private _currentProviderKey: string | null = null;
-  get currentProviderKey() : string | null {
+  get currentProviderKey(): string | null {
     return this._currentProviderKey;
   }
   set currentProviderKey(value: string) {
@@ -66,7 +65,7 @@ export class Mainview implements OnDestroy, OnInit {
       .pipe(takeUntil(this._unsubscribe))
       .subscribe(o => {
         this.availableSourceFileProviders = o;
-    });
+      });
 
     this.app.sourceFileProvider
       .pipe(takeUntil(this._unsubscribe))
@@ -75,7 +74,7 @@ export class Mainview implements OnDestroy, OnInit {
         if (o.key !== null) {
           this.open();
         }
-    })
+      })
   }
 
   ngOnDestroy(): void {
@@ -88,6 +87,7 @@ export class Mainview implements OnDestroy, OnInit {
     this.app
       .sourceFileProvider
       .pipe(
+        first(),
         tap(o => console.log(o.name)),
         concatMap(x => x.provide()),
         filter(o => o != null),
@@ -95,14 +95,15 @@ export class Mainview implements OnDestroy, OnInit {
           return parseTodoTxt(o);
         }),
         takeUntil(this._unsubscribe)
-      ).subscribe(x => {
-        this.tasks.update(tasks => { return x; });
-        this.removeWorking();
+      ).subscribe({
+        next: x => { this.tasks.update(() => { return x; }) },
+        error: () => this.removeWorking(),
+        complete: () => this.removeWorking()
       });
   }
 
   public save() {
-    var tasks = this.tasks();
+    const tasks = this.tasks();
     this.addWorking();
     const tasksString = stringifyTodoTxt(tasks);
     this.app.sourceFileProvider.pipe(
@@ -132,7 +133,7 @@ export class Mainview implements OnDestroy, OnInit {
     })
   }
 
-  compareTask(a: Task, b: Task) : number {
+  compareTask(a: Task, b: Task): number {
     if (a.completed < b.completed) {
       return -1;
     }
@@ -153,7 +154,7 @@ export class Mainview implements OnDestroy, OnInit {
   }
 
   newTaskClick() {
-    var newTask = createEmptyTask();
+    const newTask = createEmptyTask();
     const modalRef = this.modalService.open(TaskModal);
     modalRef.componentInstance.originalTask = newTask;
     modalRef.closed.pipe(
@@ -161,8 +162,8 @@ export class Mainview implements OnDestroy, OnInit {
     ).subscribe(o => {
       const task = o as Task;
       if (!task) {
-          console.log("wrong response");
-          return;
+        console.log("wrong response");
+        return;
       }
       Promise.resolve(null).then(() => {
         this.tasks.update(tasks => [...tasks, task]);

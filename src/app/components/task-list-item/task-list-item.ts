@@ -1,4 +1,4 @@
-import { Component, Input, input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Task } from '@mktbsh/todotxt';
 
 @Component({
@@ -8,9 +8,9 @@ import { Task } from '@mktbsh/todotxt';
   styleUrl: './task-list-item.scss'
 })
 export class TaskListItem {
-  @Input({required: true}) task!: Task;
+  @Input({ required: true }) task!: Task;
 
   constructor() {
-    
+
   }
 }
