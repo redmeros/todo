@@ -1,0 +1,60 @@
+<div class="container mt-2">
+
+    <div class="row">
+        <div class="col">
+            <select [(ngModel)]="currentProviderKey" class="form-select">
+                <option [value]="null">Null</option>
+                @for (item of availableSourceFileProviders; track item.key) {
+                    <option  [value]="item.key">{{ item.name }}</option>
+                }
+            </select>
+        </div>
+        <div class="col d-flex justify-content-around">
+            <button class="btn form-control btn-primary btn-m" (click)="open()">Reload</button>
+            <button class="btn form-control btn-info btn-m ms-1" (click)="save()">Save</button>
+            <button class="btn btn-success btn-m ms-1" (click)="newTaskClick()"><i class="bi bi-plus"></i></button>
+        </div>
+
+        <div class="col">
+        </div>
+
+        <div class="col">
+            <p class="float-end">
+                @if (working() > 0) {
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">loading...</span>
+                    </div>
+                }
+            </p>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+                <div class="card">
+                    <ul class="list-group">
+                        @for (item of tasks(); track item.text) {
+                            <li class="list-group-item list-group-item-action pointer align-middle align-items-center" (click)="itemClicked($event, item)">
+                                <div class="row" class="">
+                                    <div class="col">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="form-check align-content-center">
+                                                <input class="form-check-input d-inline-block" type="checkbox" [(ngModel)]="item.completed">
+                                                <label [class]="{'completedTask': item.completed, 'text-muted': item.completed}">{{ item.text }}</label>
+                                            </div>
+                                            <div class="">
+                                                <button class="btn btn-secondary me-2"><i class="bi bi-archive"></i></button>
+                                                <button class="btn btn-warning" (click)="editTaskClick($event, item)">
+                                                    <i class="bi bi-pen"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        }
+                    </ul>
+                </div>
+        </div>
+    </div>
+</div>
+
+

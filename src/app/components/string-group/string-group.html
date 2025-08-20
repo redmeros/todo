@@ -1,0 +1,14 @@
+<div class="">
+    <label class="form-label">{{ Label }}</label>
+    <div class="input-group mb-1">
+        <input type="text" class="form-control" (keyup.Enter)="onKeyUp()" [(ngModel)]="userInput">
+        <button type="button" (click)="onKeyUp()" class="btn btn-outline-success">Dodaj</button>  
+    </div>
+    <div class="row">
+        <div class="col"> 
+            @for (item of Items; track item) {
+                <button (click)="removeItem(item)" class="btn btn-secondary w-auto me-1">{{ item }} <i class="bi bi-trash"></i> </button>
+            }
+        </div>
+    </div>
+</div>

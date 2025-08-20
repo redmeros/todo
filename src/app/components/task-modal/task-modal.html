@@ -1,0 +1,52 @@
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-title">Edycja elementu</h4>
+    <button type="button" class="btn-close" aria-describedby="modal-title" (click)="modal.dismiss('cross click')"></button>
+</div>
+<div class="modal-body">
+    <div class="mb-3">
+        <label for="textInput">Tekst:</label>
+        <textarea [(ngModel)]="cloned.text" class="form-control" id="textInput" rows="4" ></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="creationDate">Data powstania</label>
+        <div class="input-group">
+            <input class="form-control"
+            placeholder="yyyy-mm-dd"
+            [displayMonths]="1"
+            [navigation]="'select'"
+            [outsideDays]="'hidden'"
+            [(ngModel)]="cloned.creationDate"
+            ngbDatepicker
+            #d="ngbDatepicker">
+            <button type="button" class="btn btn-outline-secondary bi bi-calendar3" (click)="d.toggle()"></button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="completionDate">Data zakończenia</label>
+        <div class="input-group">
+            <input class="form-control"
+            placeholder="yyyy-mm-dd"
+            [displayMonths]="1"
+            [navigation]="'select'"
+            [outsideDays]="'hidden'"
+            [(ngModel)]="cloned.completionDate"
+            ngbDatepicker
+            #d2="ngbDatepicker">
+            <button type="button" class="btn btn-outline-secondary bi bi-calendar3" (click)="d2.toggle()"></button>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="priority">Priorytet:</label>
+        <input type="text" [(ngModel)]="cloned.priority" class="form-control" id="textInput" rows="4" >
+    </div>
+    <div class="mb-3">
+        <app-string-group Label="Kontekst:" [Items]="cloned.contexts"></app-string-group>
+    </div>
+    <div class="mb-3">
+        <app-string-group Label="Projekt:" [Items]="cloned.projects"></app-string-group>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel click')">Cancel</button>
+    <button type="button" class="btn btn-success" (click)="okClicked()">Zapisz</button>
+</div>
