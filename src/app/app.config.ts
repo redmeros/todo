@@ -14,7 +14,6 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideHttpClient(),
     provideRouter(routes), 
-    provideClientHydration(withEventReplay()),
     AddTaskDateDateAdapter(),
     AddDropboxFileProvider(),
     AddFakeFileProvider(),

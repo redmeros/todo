@@ -19,9 +19,9 @@
         </div>
 
         <div class="col">
-            <p class="float-end">
+            <p class="float-end m-0 p-0">
                 @if (working() > 0) {
-                    <div class="spinner-border" role="status">
+                    <div class="spinner-border m-0 p-0" role="status">
                         <span class="visually-hidden">loading...</span>
                     </div>
                 }
@@ -32,7 +32,35 @@
         <div class="col">
                 <div class="card">
                     <ul class="list-group">
-                        @for (item of tasks(); track item.text) {
+                        @for (item of notCompletedTasks(); track item.text) {
+                            <li class="list-group-item list-group-item-action pointer align-middle align-items-center" (click)="itemClicked($event, item)">
+                                <div class="row" class="">
+                                    <div class="col">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="form-check align-content-center">
+                                                <input class="form-check-input d-inline-block" type="checkbox" [(ngModel)]="item.completed">
+                                                <label [class]="{'completedTask': item.completed, 'text-muted': item.completed}">{{ item.text }}</label>
+                                            </div>
+                                            <div class="">
+                                                <button class="btn btn-secondary me-2"><i class="bi bi-archive"></i></button>
+                                                <button class="btn btn-warning" (click)="editTaskClick($event, item)">
+                                                    <i class="bi bi-pen"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        }
+                    </ul>
+                </div>
+        </div>
+    </div>
+
+        <div class="row mt-3">
+        <div class="col">
+                <div class="card">
+                    <ul class="list-group">
+                        @for (item of completedTasks(); track item.text) {
                             <li class="list-group-item list-group-item-action pointer align-middle align-items-center" (click)="itemClicked($event, item)">
                                 <div class="row" class="">
                                     <div class="col">

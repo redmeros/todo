@@ -3,10 +3,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Launch Firefox on localhost",
+      "url": "http://localhost:4200",  // your app URL
+      "webRoot": "${workspaceFolder}",
+      "port": 6100,                    // port for Firefox debugger
+      "reloadOnAttach": true
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
+      "cleanUp": "onlyTab",
       "url": "http://localhost:4200/"
     },
     {

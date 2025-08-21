@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { concatMap, filter, first, map, mergeMap, Subject, takeUntil, tap } from 'rxjs';
 import { AppState } from '../../services/appstate';
@@ -29,6 +29,7 @@ export class Mainview implements OnDestroy, OnInit {
     this.working.update(o => o + 1)
     console.log(`adding working: ${this._working}`);
   }
+
   private removeWorking(): void {
     setTimeout(() => {
       this._working -= 1;
@@ -40,9 +41,11 @@ export class Mainview implements OnDestroy, OnInit {
   availableSourceFileProviders: Array<SourceFileProvider> = [];
 
   private _currentProviderKey: string | null = null;
+  
   get currentProviderKey(): string | null {
     return this._currentProviderKey;
   }
+
   set currentProviderKey(value: string) {
     this._currentProviderKey = value;
     const currentProvider = this.availableSourceFileProviders.find(o => o.key == this._currentProviderKey);
@@ -118,6 +121,9 @@ export class Mainview implements OnDestroy, OnInit {
   }
 
   public tasks = signal<Task[]>([]);
+
+  public completedTasks = computed(() => this.tasks().filter(o => o.completed == true));
+  public notCompletedTasks = computed(() => this.tasks().filter(o => o.completed == false));
 
   itemClicked(event: any, item: Task) {
     console.log('Event: ', event);
